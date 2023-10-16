@@ -5,3 +5,4 @@ MarkupSafe
 sqlparse
 python-dotenv
 psycopg2
+networkx

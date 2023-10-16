@@ -1,14 +1,16 @@
-
-class Node():
-    def __init__(self, index: int):
-        self.index = index
-
-
 class Edge():
     def __init__(self, index: int, source: Node, destination: Node):
         self.index = index 
         self.source = source  # вершина, из которой исходит ребро
         self.destination = destination # вершина, куда исходит ребро
+
+
+class Node():
+    def __init__(self, index: int, inedges: list(Edge)):
+        self.index = index
+        self.inedges = inedges
+
+
 
     
 

@@ -22,20 +22,20 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config["SECRET_KEY"]
+SECRET_KEY = config['SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
-    'django.contrib.auth',
     'django.contrib.contenttypes',
+    "django.contrib.auth",
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
@@ -81,7 +81,7 @@ WSGI_APPLICATION = 'kosaraju_tarjan.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': config["DB_ENGINE"],
-        'NAME': str(BASE_DIR / config["DB_NAME"]),
+        'NAME': config["DB_NAME"],
         'USER': config["DB_USER"],
         'PASSWORD': config["DB_PASSWORD"],
         'HOST': config["DB_HOST"],
