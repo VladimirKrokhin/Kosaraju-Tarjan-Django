@@ -1,0 +1,68 @@
+# 1
+# Впиши следующий блок кода, начиная с 96 строки
+
+            # Управление персонажем
+            if event.key == pygame.K_LEFT:  # <------
+                x_change = -player_speed  # <------
+            if event.key == pygame.K_RIGHT:  # <------
+                x_change = player_speed # <------
+        if event.type == pygame.KEYUP: # <------
+            if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT: # <------
+                x_change = 0 # <------
+
+
+
+
+# 2
+# Впиши, начиная с 66 строки
+
+def update_platforms(my_list, y_pos, change):
+    global score  # <------
+    if y_pos < 250 and change < 0:  # <------
+        for i in range(len(my_list)):  # <------
+            my_list[i][1] -= change  # <------
+ #   else:
+  #      pass
+    for item in range(len(my_list)):  # <------
+        if my_list[item][1] > 500:  # <------
+            my_list[item] = [random.randint(10, 320), random.randint(-50, -10), 70, 10]  # <------
+            score += 1  # <------
+    return my_list  # <------
+
+# И напиши на 126 строке
+
+    platforms = update_platforms(platforms, player_y, y_change)  # <------
+
+
+
+
+
+# 3
+# Впиши, начиная с 109  строки
+
+            if event.key == pygame.K_SPACE and game_over:  # <-------
+                game_over = False  # <-------
+                score = 0  # <-------
+                player_x = 170  # <-------
+                player_y = 400  # <-------
+                background = white  # <-------
+                score_last = 0  # <-------
+                jump_last = 0 # <-------
+                platforms = [[175, 480, 70, 10], [85, 370, 70, 10], [265, 370, 70, 10], [175, 260, 70, 10],
+                             [85, 150, 70, 10], [265, 150, 70, 10], [175, 40, 70, 10]] # <-------
+
+# 4
+# Добавь код на 116 строку
+                super_jumps = 2  # <-------
+
+# 124 строка
+
+            if event.key == pygame.K_SPACE and not game_over and super_jumps > 0:  # <-------
+                super_jumps -= 1  # <-------
+                y_change = -15  # <-------
+
+# 169 строка
+
+    if score - jump_last > 50:  # <-------
+        jump_last = score  # <-------
+        super_jumps += 1  # <-------
