@@ -1,8 +1,0 @@
-asgiref
-Django
-Jinja2
-MarkupSafe
-sqlparse
-python-dotenv
-psycopg2
-networkx
