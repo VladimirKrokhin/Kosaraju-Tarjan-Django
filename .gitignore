@@ -2,3 +2,5 @@
 .env
 *.pyc
 db.*
+backend/‘/
+backend/logfile
