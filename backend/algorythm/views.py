@@ -5,23 +5,22 @@ from rest_framework import permissions
 from .serializers import NodeSerializer, GraphSerializer, UserSerializer
 from django.contrib.auth.models import User
 
+
 # Create your views here.
 
 def index(request, graph_id):
-    context = {"graph_id": graph_id}
-    return render(request, "algorythm/index.html",
-                   context=context)
+    return render(request, f'index.html', context = {"graph_id":graph_id})
 
 def create_graph(request):
     if request.method == "POST":
-        id = request.POST["id"]
         name = request.POST["name"]
         user = request.user
 
-        return redirect("graph_detail", pk=graph.create(id = id, name = name, user = user))
+        return redirect("index", pk=graph.create(name = name, user = user))
     # перенаправляем на страницу деталей созданного графа
 
-    return render(request, "algorythm/create.graph.html")
+    return render(request, "algorythm/create_graph.html")
+
 
 class GraphViewSet(viewsets.ModelViewSet):
     """

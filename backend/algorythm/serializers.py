@@ -10,6 +10,7 @@ class GraphSerializer(serializers.HyperlinkedModelSerializer):
         fields = ['url', 'id', 'name', 'user']
         extra_kwargs = {
             'url': {'view_name': 'index', 'lookup_field': 'name'},
+            'users': {'lookup_field': 'username'}
         }
 
 
@@ -21,7 +22,8 @@ class NodeSerializer(serializers.HyperlinkedModelSerializer):
         extra_kwargs = {
             'url': {'view_name': 'index', 'lookup_field': 'name'},
             'graph': {'lookup_field': 'id'},
-            'parents': {'lookup_field': 'parents'}
+            'parents': {'lookup_field': 'parents'},
+            'users': {'lookup_field': 'username'}
         }
 
 

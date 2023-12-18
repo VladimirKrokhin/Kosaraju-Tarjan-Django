@@ -1,5 +1,24 @@
-#mynetwork {
-    width: 600px;
-    height: 400px;
-    border: 1px solid lightgray;
+
+
+/* Основные стили */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+/* Стили для компонентов */
+h1 {
+  font-size: 24px;
+  color: #333;
+}
+
+a {
+  text-decoration: none;
+  color: #007bff;
+}
+
+/* Медиа-запросы для адаптивной верстки */
+@media (max-width: 768px) {
+  /* Стили для мобильных устройств */
 }

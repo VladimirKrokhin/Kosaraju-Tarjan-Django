@@ -1,6 +1,10 @@
 .venv
 .env
 *.pyc
+.*
+
 db.*
 backend/‘/
+backend/lib/
 backend/logfile
+backend/algorythm/static/algorythm/graphes/
