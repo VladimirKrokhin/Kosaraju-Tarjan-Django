@@ -10,10 +10,11 @@ router.register(r'nodes', views.NodeViewSet)
 
 app_name = "algorythm"
 urlpatterns = [
-    path('', include(router.urls)),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+    path("create/", views.create_graph, name="create"),
     path("<int:graph_id>/", views.index, name="index"),
-    path("create/", views.create_graph, name="create")]
+    path('', include(router.urls))
+]
 
 
 urlpatterns += router.urls

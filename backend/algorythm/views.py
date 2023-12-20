@@ -1,25 +1,37 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Node, Graph
 from rest_framework import viewsets
 from rest_framework import permissions
 from .serializers import NodeSerializer, GraphSerializer, UserSerializer
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required 
+from django.http import HttpResponseForbidden
 
 
 # Create your views here.
 
+@login_required
 def index(request, graph_id):
-    return render(request, f'index.html', context = {"graph_id":graph_id})
+    user = request.user
+    graph = get_object_or_404(Graph, pk=graph_id)
+    if (graph.user.id == user.id):
+        context = {"graph_id":graph_id}
+        return render(request, 'index.html', context)
+    else:
+        return HttpResponseForbidden('You do not have permission to access this graph')
 
+@login_required
 def create_graph(request):
     if request.method == "POST":
         name = request.POST["name"]
         user = request.user
+        graph = Graph.create(name, user)
 
-        return redirect("index", pk=graph.create(name = name, user = user))
-    # перенаправляем на страницу деталей созданного графа
+        return redirect(f'/graph/{graph.id}')
+        # перенаправляем на страницу  созданного 
 
-    return render(request, "algorythm/create_graph.html")
+    return render(request, "create_graph.html")
+
 
 
 class GraphViewSet(viewsets.ModelViewSet):

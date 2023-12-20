@@ -12,13 +12,15 @@ class Graph(models.Model):
         name = models.CharField(verbose_name="graph's =  name", max_length=80)
         user = models.ForeignKey(User, on_delete=models.CASCADE)
 
-        def create(self, name, user):
+        @classmethod
+        def create(cls, name, user):
             """
             Создает и возвращает новую "Graph" сущность основываясь на валидированных данных.
             """
-            graph = Graph.objects.create(name = name, user = user)
+            graph = cls.objects.create(name=name, user=user)
             graph.generate_html()
             return graph
+            
 
         def update(self, instance, name):
             """
@@ -31,11 +33,31 @@ class Graph(models.Model):
         def generate_html(self):
                 # Create graph in PyVis
 
-                network = Network(height="750px", width="50%", directed=True, heading = f"#{self.id} {self.name}",bgcolor="#F6F2FF", font_color="#222222", filter_menu=False, cdn_resources = "remote")
+                network = Network(height="750px", width="50%", directed=True, heading = f"#{self.id} {self.name}",bgcolor="#F6F2FF", font_color="#222222", filter_menu=True, cdn_resources = "remote")
                 network.barnes_hut()
                 #network.barnes_hut(gravity=-80000, central_gravity=8, spring_length=250, spring_strength=0.001, damping=0.09, overlap=0)
                 network.inherit_edge_colors(status=True)
                 network.toggle_stabilization(status=True)
+                # network.set_options("""
+                # var options = {
+                #     "configure": {
+                #         "enabled": true,
+                #         "filter": "physics",
+                #         "container": "undefined",
+                #         "showButton": true
+                #     },
+
+                #     "physics": {
+                #         "barnesHut": {
+                #             "gravitationalConstant": -80000,
+                #             "centralGravity": 3.0,
+                #             "springLength": 250,
+                #             "springConstant": 0.001
+                #         },
+                #         "minVelocity": 0.75
+                #     }
+                # }
+                # """)
 
                 # Fetch nodes from Django ORM by graph_id
                 nodes = Node.objects.filter(graph_id=self.id)
@@ -53,8 +75,9 @@ class Graph(models.Model):
                 for node in network.nodes:
                     node["title"] += " Соединено с:\n" + "\n".join(network.get_node(neighbor)["label"] for neighbor in network.neighbors(node["id"]))
 
-                network.show_buttons(filter_=['physics'])
-                network.save_graph(str(settings.BASE_DIR)+f'/algorythm/static/algorythm/graphes/pvis_graph{self.id}_file.html')
+                network.show_buttons(filter_=["nodes", "edges", "physics"])
+
+                network.save_graph(str(settings.BASE_DIR)+f'/algorythm/templates/algorythm/graphes/pvis_graph{self.id}.html')
 
         def add_node(self, name):
             return Node.create(name, self)

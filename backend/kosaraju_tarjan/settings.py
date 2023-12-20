@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'algorythm.apps.AlgorythmConfig',
+    'algorythm.apps.AlgorythmConfig'
 ]
 
 MIDDLEWARE = [
@@ -59,7 +59,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, 'algorythm/templates/algorythm')
+            os.path.join(BASE_DIR, 'algorythm/templates/algorythm'),
+            os.path.join(BASE_DIR, 'kosaraju_tarjan/templates')
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -143,3 +144,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+LOGIN_URL = '/login/'

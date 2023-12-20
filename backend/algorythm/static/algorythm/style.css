@@ -7,6 +7,72 @@ body {
   padding: 0;
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                                                                                                                                                                                                                                                                                                                                                                
+
+
+2
 /* Стили для компонентов */
 h1 {
   font-size: 24px;
@@ -21,4 +87,38 @@ a {
 /* Медиа-запросы для адаптивной верстки */
 @media (max-width: 768px) {
   /* Стили для мобильных устройств */
+}
+
+/* Стили для таблицы */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+/* Стили для ячеек */
+td, th {
+  border: 1px solid #dddddd;
+  text-align: left;
+  padding: 8px;
+}
+
+/* Стили для четных строк */
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+/* Стили для заголовков столбцов */
+th {
+  background-color: #4CAF50;
+  color: white;
+}
+
+/* Стили для строк при наведении */
+tr:hover {
+  background-color: #e2e2e2;
+}
+
+/* Стили для активной строки */
+tr.active {
+  background-color: #c7c7c7;
 }
