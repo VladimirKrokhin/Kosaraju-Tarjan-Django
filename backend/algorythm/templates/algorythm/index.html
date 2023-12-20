@@ -1,16 +1,21 @@
 {% extends "_base.html" %}
-{% load static %}
+
 
 
 {% block title %}
   Главная страница с графом {{ graph_id }}.
 {% endblock %}
 
-{% block include %}
 
-{% endblock %}
 
 {% block content %}
 
-<embed type="text/html" src="{% static "algorythm/graphes/pvis_graph" %}{{ graph_id }}_file.html" width="100%" height="900">
+
+
+{% with graph_id|stringformat:"d" as formatted_graph_id %}
+  {% with "algorythm/graphes/pvis_graph"|add:formatted_graph_id|add:".html" as dynamic_template_name %}
+    {% include dynamic_template_name %}
+  {% endwith %}
+{% endwith %}
+
 {% endblock %}

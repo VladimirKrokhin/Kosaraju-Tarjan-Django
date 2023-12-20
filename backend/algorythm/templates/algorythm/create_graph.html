@@ -1,11 +1,15 @@
 {% extends "_base.html" %}
 
 {% block title %}
-  Создание графа.
-{% endblock %}
+  Create graph
+ {% endblock %}
 
 
 {% block content %}
-  <h1>Главная страница</h1>
-  <p>Создание графа</p>
+<h1>Create a New Graph</h1>
+<form method="post">
+    {% csrf_token %}
+    <label for="name">Graph Name:</label>
+    <input type="text" id="name" name="name">
+    <input type="submit" value="Create Graph">
 {% endblock %}
