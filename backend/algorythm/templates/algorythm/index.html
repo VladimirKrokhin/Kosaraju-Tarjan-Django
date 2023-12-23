@@ -108,7 +108,8 @@ $.ajax({
         locales: locales,
         autoResize: true,
         configure: {
-          showButton: true,
+          enabled: false,
+          showButton: false,
         },
         nodes: {
             borderWidth: 5,
@@ -133,10 +134,8 @@ $.ajax({
         },
 
         edges: {
-          color: {
-            color: "#202A25",
-            highlight: "#202A25",
-            hover: "#202A25",
+          color: { 
+            inherit: "to",
             opacity: 0.75,
           },
           dashes: true,
@@ -160,7 +159,7 @@ $.ajax({
           },
           manipulation: {
           enabled: true,
-          initiallyActive: true,
+          initiallyActive: false,
           addNode: function (data, callback) {
              document.getElementById("operation").innerText = "Добавить вершину";
              document.getElementById("node-label").value = data.label;
