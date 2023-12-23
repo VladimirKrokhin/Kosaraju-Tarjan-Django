@@ -8,7 +8,7 @@ from rest_framework.reverse import reverse
 
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required 
-from django.shortcuts import get_object_or_404
+from django.shortcuts import render, get_object_or_404
 
 
 
