@@ -152,13 +152,15 @@ $.ajax({
           navigationButtons: true
         },
         layout: {
-            randomSeed: 2,
+          randomSeed: 2,
             improvedLayout: true
-        },
-        physics: {
+          },
+          physics: {
             enabled: true
-        },
-        manipulation: {
+          },
+          manipulation: {
+          enabled: true,
+          initiallyActive: true,
           addNode: function (data, callback) {
              document.getElementById("operation").innerText = "Добавить вершину";
              document.getElementById("node-label").value = data.label;
@@ -166,8 +168,8 @@ $.ajax({
                this,
                data,
                callback
-             );
-             document.getElementById("cancelButton").onclick =
+               );
+               document.getElementById("cancelButton").onclick =
                clearPopUp.bind();
              document.getElementById("network-popUp").style.display = "block";
            },
@@ -194,8 +196,8 @@ $.ajax({
               }
             } else {
               callback(data);
-            "enabled": true,
-            "initiallyActive": true
+            }
+          }
         },
         groups: {}
       };
