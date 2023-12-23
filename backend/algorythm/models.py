@@ -12,7 +12,7 @@ from django.conf import settings
 class Graph(models.Model):
         id = models.BigAutoField(primary_key=True)
         name = models.CharField(verbose_name="graph's =  name", max_length=80)
-        user = models.ForeignKey(User, on_delete=models.CASCADE)
+        owner = models.ForeignKey(User, related_name="graphs", on_delete=models.CASCADE)
 
 
 
@@ -80,3 +80,5 @@ class Node(models.Model):
             instance.parents = parents
             instance.save()
             return instance
+
+

@@ -9,7 +9,9 @@ app_name = "algorythm"
 urlpatterns = [
     path('graphs/', views.GraphList.as_view()),
     path('graphs/<int:pk>/', views.GraphDetail.as_view()),
-    path("create/", views.create_graph, name="create"),
+    path('users/', views.UserList.as_view()),
+    path('users/<int:pk>/', views.UserDetail.as_view()),
+    # path("create/", views.create_graph, name="create"),
     path("index/<int:graph_id>/", views.index, name="index"),
 ]
 

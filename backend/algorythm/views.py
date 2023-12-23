@@ -32,8 +32,8 @@ class GraphList(generics.ListCreateAPIView):
                           IsOwnerOrReadOnly]
 
 
-    # def perform_create(self, serializer):
-    #     serializer.save(owner=self.request.user)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 
@@ -49,9 +49,6 @@ class GraphDetail(generics.RetrieveUpdateDestroyAPIView):
 
     # def perform_create(self, serializer):
     #     serializer.save(owner=self.request.user)
-
-
-
 
 
 

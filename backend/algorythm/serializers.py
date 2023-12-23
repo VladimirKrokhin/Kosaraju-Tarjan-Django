@@ -14,9 +14,12 @@ class NodeSerializer(serializers.ModelSerializer):
 
 
 class GraphSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+    
+    
     class Meta:
         model = Graph
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'owner']
 
     
 
@@ -35,3 +38,9 @@ class GraphDetailSerializer(serializers.ModelSerializer):
             edges[node.id] = incident_nodes
         return edges
 
+class UserSerializer(serializers.ModelSerializer):
+    graphs = serializers.PrimaryKeyRelatedField(many=True, queryset=Graph.objects.all())
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'graphs']
