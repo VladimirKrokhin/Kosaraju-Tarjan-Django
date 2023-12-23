@@ -14,6 +14,18 @@
 {% endblock %}
 
 {% block content %}
+<div id="network-popUp">
+  <span id="operation">node</span> <br />
+  <table style="margin: auto">
+    <tr>
+      <td>Надпись</td>
+      <td><input id="node-label" value="new value" /></td>
+    </tr>
+  </table>
+  <input type="button" value="Сохранить" id="saveButton" />
+  <input type="button" value="Отмена" id="cancelButton" />
+</div>
+<br />
 <div id="network">
   <div class="vis-network" tabindex="0" style="position: relative; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;">
     <canvas width="600" style="position: relative; touch-action: none; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;" height="400">
@@ -22,6 +34,25 @@
 </div>
 
 <script>
+  function clearPopUp() {
+    document.getElementById("saveButton").onclick = null;
+    document.getElementById("cancelButton").onclick = null;
+    document.getElementById("network-popUp").style.display = "none";
+  }
+
+  function cancelEdit(callback) {
+    clearPopUp();
+    callback(null);
+  }
+
+  function saveData(data, callback) {
+    data.label = document.getElementById("node-label").value;
+    clearPopUp();
+    callback(data);
+  }
+
+
+
 $.ajax({
     url: '/graphs/{{ graph_id }}',
     type: 'GET',
@@ -128,6 +159,41 @@ $.ajax({
             enabled: true
         },
         manipulation: {
+          addNode: function (data, callback) {
+             document.getElementById("operation").innerText = "Добавить вершину";
+             document.getElementById("node-label").value = data.label;
+             document.getElementById("saveButton").onclick = saveData.bind(
+               this,
+               data,
+               callback
+             );
+             document.getElementById("cancelButton").onclick =
+               clearPopUp.bind();
+             document.getElementById("network-popUp").style.display = "block";
+           },
+           editNode: function (data, callback) {
+             // filling in the popup DOM elements
+             document.getElementById("operation").innerText = "Изменить вершину";
+             document.getElementById("node-label").value = data.label;
+             document.getElementById("saveButton").onclick = saveData.bind(
+               this,
+               data,
+               callback
+             );
+             document.getElementById("cancelButton").onclick = cancelEdit.bind(
+               this,
+               callback
+             );
+             document.getElementById("network-popUp").style.display = "block";
+           },
+           addEdge: function (data, callback) {
+            if (data.from == data.to) {
+              var r = confirm("Вы действительно хотите соединить ребро само с собой?");
+              if (r == true) {
+                callback(data);
+              }
+            } else {
+              callback(data);
             "enabled": true,
             "initiallyActive": true
         },
@@ -136,9 +202,43 @@ $.ajax({
       var network = new vis.Network(container, graphData_vis);
       network.setOptions(options);
       },
+
       error: function(jqXHR, textStatus, errorThrown) {
           console.error('Ошибка при получении данных о графе: ' + textStatus, errorThrown);
     }
-});
+
+
+
+    });
+
+// Получаем элемент меню
+var networkPopUp = document.getElementById('network-popUp');
+
+// Устанавливаем начальные координаты для перемещения меню
+var offsetX;
+var offsetY;
+
+// Функция, отвечающая за перемещение меню
+function dragStart(e) {
+  offsetX = e.clientX - networkPopUp.getBoundingClientRect().left;
+  offsetY = e.clientY - networkPopUp.getBoundingClientRect().top;
+  window.addEventListener('mousemove', drag);
+  window.addEventListener('mouseup', dragEnd);
+}
+
+// Функция, отслеживающая перемещение меню
+function drag(e) {
+  networkPopUp.style.left = e.clientX - offsetX + 'px';
+  networkPopUp.style.top = e.clientY - offsetY + 'px';
+}
+
+// Функция, завершающая перемещение меню
+function dragEnd() {
+  window.removeEventListener('mousemove', drag);
+  window.removeEventListener('mouseup', dragEnd);
+}
+
+// Отслеживаем нажатие кнопки мыши для начала перемещения меню
+networkPopUp.addEventListener('mousedown', dragStart);
 </script>
 {% endblock %}

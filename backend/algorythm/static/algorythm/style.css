@@ -7,11 +7,69 @@ body {
   padding: 0;
 }
 
+body,
+select {
+  font: 10pt sans;
+}
+
 #network {
   width: 800px;
   height: 600px;
   background-color: #F6F2FF;
+  position: relative;
+  border: 1px solid lightgray;
 }
+
+#operation {
+  font-size: 28px;
+}
+
+#network-popUp {
+  display: none;
+  position: absolute;
+  z-index: 299;
+  width: 250px;
+  padding: 10px;  /* Убираем фиксированную высоту */
+  text-align: center;
+  box-sizing: border-box; /* Учитываем отступы и рамку в ширине элемента */
+  background-color: #f9f9f9;
+  border: 3px solid #5394ed;
+  top: 50%;  
+  left: 50%;  
+}
+
+#network-popUp table {
+  margin: auto;  /* Выравнивание по центру */
+  width: 100%;  /* Растягиваем таблицу на всю ширину контейнера */
+}
+
+#network-popUp input {
+  display: block; /* Размещаем поля ввода на новой строке */
+  width: calc(100% - 20px);  /* 100% ширина с вычетом отступов */
+  margin: 10px 0;  /* Отступы сверху и снизу */
+  padding: 5px;  /* Придаем полям ввода отступы внутри, чтобы текст не "прилипал" к границам */
+  box-sizing: border-box; /* Учитываем отступы и рамку в ширине элемента */
+}
+
+#saveButton, #cancelButton {
+  width: calc(50% - 7.5px);  /* 50% ширина с вычетом отступов */
+  margin: 10px 3.75px;  /* Отступы сверху и снизу, половина отступов по бокам */
+  padding: 5px;  /* Придаем кнопкам отступы внутри */
+  box-sizing: border-box; /* Учитываем отступы и рамку в ширине элемента */
+}
+
+#saveButton {
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+}
+
+#cancelButton {
+  background-color: #f44336;
+  color: white;
+  border: none;
+}
+
 
 /* Стили для компонентов */
 h1 {
@@ -30,16 +88,27 @@ a {
 }
 
 /* Стили для таблицы */
-table {
-  border-collapse: collapse;
-  width: 100%;
-}
 
-/* Стили для ячеек */
-td, th {
-  border: 1px solid #dddddd;
-  text-align: left;
-  padding: 8px;
+
+table.legend_table {
+  font-size: 11px;
+  border-width: 1px;
+  border-color: #d3d3d3;
+  border-style: solid;
+}
+table.legend_table,
+td {
+  border-width: 1px;
+  border-color: #d3d3d3;
+  border-style: solid;
+  padding: 2px;
+}
+div.table_content {
+  width: 80px;
+  text-align: center;
+}
+div.table_description {
+  width: 100px;
 }
 
 /* Стили для четных строк */
