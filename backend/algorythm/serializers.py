@@ -1,37 +1,37 @@
-from algorythm.models import Graph, Node
+from .models import Graph, Node
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.response import Response
+from rest_framework.decorators import action
 
 
 
-class GraphSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = Graph
-        fields = ['url', 'id', 'name', 'user']
-        extra_kwargs = {
-            'url': {'view_name': 'index', 'lookup_field': 'name'},
-            'users': {'lookup_field': 'username'}
-        }
-
-
-
-class NodeSerializer(serializers.HyperlinkedModelSerializer):
+class NodeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Node
-        fields = ['url', 'id', 'name', 'graph', 'parents']
-        extra_kwargs = {
-            'url': {'view_name': 'index', 'lookup_field': 'name'},
-            'graph': {'lookup_field': 'id'},
-            'parents': {'lookup_field': 'parents'},
-            'users': {'lookup_field': 'username'}
-        }
+        fields = ['id', 'name']
 
 
 
-class UserSerializer(serializers.HyperlinkedModelSerializer):
+class GraphSerializer(serializers.ModelSerializer):
     class Meta:
-        model = User
-        fields = ['url', 'username', 'email']
-        extra_kwargs = {
-            'url': {'view_name': 'index', 'lookup_field': 'username'}
-            }
+        model = Graph
+        fields = ['id', 'name']
+
+    
+
+class GraphDetailSerializer(serializers.ModelSerializer):
+    nodes = NodeSerializer(many=True, read_only=True, source='node_set')
+    edges = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Graph
+        fields = ['id', 'name', 'nodes', 'edges']
+
+    def get_edges(self, obj):
+        edges = {}
+        for node in obj.node_set.all():
+            incident_nodes = list(node.parents.all().values_list('id', flat=True))
+            edges[node.id] = incident_nodes
+        return edges
+

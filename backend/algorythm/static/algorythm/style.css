@@ -7,72 +7,12 @@ body {
   padding: 0;
 }
 
+#network {
+  width: 800px;
+  height: 600px;
+  background-color: #F6F2FF;
+}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-                                                                                                                                                                                                                                                                                                                                                                
-
-
-2
 /* Стили для компонентов */
 h1 {
   font-size: 24px;

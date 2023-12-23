@@ -1,20 +1,16 @@
 from django.urls import include, path
 from rest_framework import routers
+from rest_framework.urlpatterns import format_suffix_patterns
+from rest_framework.permissions import DjangoModelPermissions
 from . import views
 
 
-router = routers.DefaultRouter()
-router.register(r'users', views.UserViewSet)
-router.register(r'graphes', views.GraphViewSet)
-router.register(r'nodes', views.NodeViewSet)
-
 app_name = "algorythm"
 urlpatterns = [
-    path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
-    path("create/", views.create_graph, name="create"),
-    path("<int:graph_id>/", views.index, name="index"),
-    path('', include(router.urls))
+    path('graphs/', views.graph_list),
+    path('graphs/<int:pk>/', views.graph_detail),
+    # path("create/", views.create_graph, name="create"),
+    path("index/<int:graph_id>/", views.index, name="index"),
 ]
 
-
-urlpatterns += router.urls
+urlpatterns = format_suffix_patterns(urlpatterns)

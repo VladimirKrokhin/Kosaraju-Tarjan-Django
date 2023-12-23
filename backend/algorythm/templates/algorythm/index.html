@@ -1,21 +1,144 @@
 {% extends "_base.html" %}
-
-
+{% load static %}
 
 {% block title %}
-  Главная страница с графом {{ graph_id }}.
+Визуализация графа.
 {% endblock %}
 
+{% block include %}
 
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript" src="{% static 'algorythm/node_modules/visjs-network/dist/vis.js' %}"></script>
+<link rel="stylesheet" type="text/css" href="{% static 'algorythm/node_modules/visjs-network/dist/vis.css' %}">
+<link rel="stylesheet" type="text/css" href="{% static 'algorythm/style.css' %}"/>
+{% endblock %}
 
 {% block content %}
+<div id="network">
+  <div class="vis-network" tabindex="0" style="position: relative; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;">
+    <canvas width="600" style="position: relative; touch-action: none; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;" height="400">
+  </canvas>
+  </div>
+</div>
+
+<script>
+$.ajax({
+    url: '/graphs/{{ graph_id }}',
+    type: 'GET',
+    dataType: 'json',
+    success: function(data) {
+      var nodes = [];
+      data.nodes.forEach(function(node) {
+        nodes.push({
+          id: node.id,
+          label: node.name
+        });
+      });
+      
+      var nodes_vis = new vis.DataSet(nodes);
+        
+      var edges = [];
+      Object.keys(data.edges).forEach(function(key) {
+          data.edges[key].forEach(function (target) {
+              edges.push({from: key, to: target});
+          });
+      });
+      var edges_vis = new vis.DataSet(edges);
+  
+      var graphData_vis = {
+          nodes: nodes_vis,
+          edges: edges_vis
+      };
+  
+      var container = document.getElementById('network');
+
+      
+      var locales = {
+        ru: {
+          edit: 'Изменить',
+          del: 'Удалить выбранное',
+          back: 'Назад',
+          addNode: 'Добавить вершину',
+          addEdge: 'Добавить ребро',
+          editNode: 'Редактировать вершину',
+          editEdge: 'Редактировать ребро',
+          addDescription: 'Нажмите на свободное пространство, чтобы разместить новую вершину.',
+          edgeDescription: 'Нажмите на вершину и проведите ребро до другой вершины, чтобы соединить их.',
+          editEdgeDescription: 'Нажми на конечные точки и проведи их к другой вершине, чтобы соединить их.',
+          createEdgeError: 'Невозможно связать вершины с кластером.',
+          deleteClusterError: 'Кластеры не могут быть удалены.',
+          editClusterError: 'Кластеры не могут быть изменены.'
+        }
+      };
 
 
+      var options = {
+        locale: 'ru',
+        locales: locales,
+        autoResize: true,
+        configure: {
+          showButton: true,
+        },
+        nodes: {
+            borderWidth: 5,
+            borderWidthSelected: 10,
+            shape: "dot",
+            size: 20,
+            color: {
+              border: "#7D47B6",
+              background: "#4A1493",
+              highlight: {
+                border: "#A07AE9",
+                background: "#7D47B6",
+              },
+              hover: {
+                border: "#E0CA3C",
+                background: "#CD9709",
+              }
+            },
+            font: {
+              strokeWidth: 20
+            }
+        },
 
-{% with graph_id|stringformat:"d" as formatted_graph_id %}
-  {% with "algorythm/graphes/pvis_graph"|add:formatted_graph_id|add:".html" as dynamic_template_name %}
-    {% include dynamic_template_name %}
-  {% endwith %}
-{% endwith %}
+        edges: {
+          color: {
+            color: "#202A25",
+            highlight: "#202A25",
+            hover: "#202A25",
+            opacity: 0.75,
+          },
+          dashes: true,
+          arrows: "to"
+        },
 
+        interaction: {
+          hover: true,
+          keyboard: {
+            enabled: true
+          },
+          multiselect: true,
+          navigationButtons: true
+        },
+        layout: {
+            randomSeed: 2,
+            improvedLayout: true
+        },
+        physics: {
+            enabled: true
+        },
+        manipulation: {
+            "enabled": true,
+            "initiallyActive": true
+        },
+        groups: {}
+      };
+      var network = new vis.Network(container, graphData_vis);
+      network.setOptions(options);
+      },
+      error: function(jqXHR, textStatus, errorThrown) {
+          console.error('Ошибка при получении данных о графе: ' + textStatus, errorThrown);
+    }
+});
+</script>
 {% endblock %}
