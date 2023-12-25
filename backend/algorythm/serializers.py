@@ -23,6 +23,8 @@ class NodeSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Не указан 'graph_id' в контексте при создании вершины.")
 
 
+
+
 class EdgeSerializer(serializers.Serializer):
     source_node_id = serializers.PrimaryKeyRelatedField(source='id', queryset=Node.objects.all())
     target_node_ids = serializers.ListField(child=serializers.IntegerField(), write_only=True)
@@ -79,15 +81,9 @@ class EdgeSerializer(serializers.Serializer):
         return instance
 
                 
-
-
     def validate(self, data):
         source_node_id = data.get('source_node_id')
         target_node_ids = data.get('target_node_ids')
-
-
-        # if not isinstance(source_node_id, int):
-        #     raise serializers.ValidationError("Source node должен быть целым числом")
 
         if not Node.objects.filter(id=source_node_id).exists():
             raise ValidationError("Исходный узел не существует")
@@ -102,7 +98,6 @@ class EdgeSerializer(serializers.Serializer):
                 raise ValidationError(f"Node with id {target_id} does not exist")
                 if not isinstance(target_id, int):
                     raise serializers.ValidationError("Каждый элемент в списке должен быть целым числом")
-
 
         return data
 

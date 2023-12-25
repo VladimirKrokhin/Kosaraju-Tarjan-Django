@@ -33,6 +33,20 @@
 </div>
 
 <script>
+
+  let network;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const runButton = document.createElement('input'); // создаем кнопку
+    runButton.type = 'button'; // устанавливаем тип
+    runButton.value = 'Запустить алгоритм'; // устанавливаем текст кнопки
+    runButton.id = 'runButton'; // устанавливаем id
+    document.body.appendChild(runButton); // добавляем кнопку в body
+
+    runButton.addEventListener('click', () => {
+      runAlgorithmAndDisplayResult(network); // вызов функции при нажатии на кнопку
+    });
+  });
   
 
   {% comment %} Отображение всплывающего меню создания и редактирования вершин {% endcomment %}
@@ -368,16 +382,97 @@ var options = {
   
   
 },
-groups: {}
+groups: {
+}
 
 };
 
-var network = new vis.Network(container, graphData_vis, options);
+network = new vis.Network(container, graphData_vis, options);
 
 });
 
 
 
+function generateRandomColor() {
+  // Генерируем случайное целое число для каждого канала цвета (RGB)
+  var r = Math.floor(Math.random() * 256);
+  var g = Math.floor(Math.random() * 256);
+  var b = Math.floor(Math.random() * 256);
+
+  // Форматируем значения каналов цвета в строку HEX
+  var color = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+
+  return color;
+}
+
+
+function createRandomGroups(numGroups) {
+  var groups = {};
+  for (var i = 1; i <= numGroups; i++) {
+    var groupName = "group" + i;
+    groups[groupName] = {
+      color: {
+        background: generateRandomColor()
+      }
+    };
+  }
+  return groups;
+}
+
+
+function runAlgorithmAndDisplayResult(network) {
+  const csrftoken = getCookie('csrftoken');
+
+  // Вызов API для запуска алгоритма
+  fetch("/graphs/{{ graph_id }}/run-algorithm/?algorithm_type=kosaraju", {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrftoken
+    },
+    body: JSON.stringify({})
+  })
+  .then(response => response.json())
+  .then(data => {
+    const node_ids = data;
+    const numberOfGroups = node_ids.length;
+    const randomOfGroups = createRandomGroups(numberOfGroups);
+    var opt = {
+      groups: randomOfGroups
+    };
+    network.setOptions(opt);
+    var groupsAssigned = assignGroupsToVertices(node_ids);
+
+    // Перекраска вершин
+    for (var vertex in groupsAssigned) {
+      var group = groupsAssigned[vertex];
+      var node = network.body.nodes[vertex];
+      if (node) {
+          node.group =  group;
+      }
+    }
+
+  })
+  .catch(error => {
+    console.error('Ошибка при вызове API:', error);
+  });
+}  
+
+runAlgorithmAndDisplayResult(network); 
+
+
+function assignGroupsToVertices(listOfStronglyConnectedComponents) {
+  var groupsAssigned = {};
+  for (var i = 0; i < listOfStronglyConnectedComponents.length; i++) {
+      var component = listOfStronglyConnectedComponents[i];
+      for (var j = 0; j < component.length; j++) {
+          var vertex = component[j];
+          var groupName = "group" + (i+1);
+          groupsAssigned[vertex] = groupName;
+      }
+  }
+  return groupsAssigned;
+}
 </script>
 
 {% endblock %}

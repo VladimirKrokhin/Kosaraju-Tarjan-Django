@@ -1,8 +1,11 @@
 from algorythm.models import Graph, Node
 from algorythm.serializers import GraphSerializer, UserSerializer, NodeSerializer, EdgeSerializer
 from algorythm.permissions import IsOwnerOrReadOnly, IsGraphOwner
+from algorythm.kosarajus_algorythm import kosaraju_algo
+from algorythm.tarjans_algorythm import tarjan_algo
 
-from rest_framework import generics, permissions, renderers, mixins
+
+from rest_framework import generics, permissions, renderers, mixins, status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.reverse import reverse
@@ -102,6 +105,24 @@ class UserList(generics.ListAPIView):
 class UserDetail(generics.RetrieveAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+
+class RunAlgorithmView(generics.GenericAPIView):
+    def post(self, request,graph_id):
+        algorithm_type = request.query_params.get('algorithm_type')
+        print(algorithm_type)
+        if algorithm_type == "kosaraju" or algorithm_type == "tarjan":
+            graph = Graph.objects.get(pk=graph_id)
+            node_list = graph.get_node_ids()
+            adj_list = graph.get_adj_list()
+            if algorithm_type == 'kosaraju':
+                result_array = kosaraju_algo(adj_list, node_list)
+            elif algorithm_type == "tarjan":
+                result_array = tarjan_algo(adj_list, node_list)
+        else:
+            return Response("Неправильный тип алгоритма", status=status.HTTP_400_BAD_REQUEST)
+        return Response(result_array, status=status.HTTP_200_OK)
 
 
     
