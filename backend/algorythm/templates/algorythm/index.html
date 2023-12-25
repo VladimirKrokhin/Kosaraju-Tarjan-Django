@@ -15,231 +15,369 @@
 
 {% block content %}
 <div id="network-popUp">
-  <span id="operation">node</span> <br />
+  <span id="operation"></span> <br />
   <table style="margin: auto">
     <tr>
       <td>Надпись</td>
-      <td><input id="node-label" value="new value" /></td>
+      <td><input id="label" value="new value" /></td>
     </tr>
   </table>
   <input type="button" value="Сохранить" id="saveButton" />
   <input type="button" value="Отмена" id="cancelButton" />
 </div>
-<br />
 <div id="network">
   <div class="vis-network" tabindex="0" style="position: relative; overflow: hidden; touch-action: pan-y; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;">
-    <canvas width="600" style="position: relative; touch-action: none; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;" height="400">
-  </canvas>
+    <canvas style="position: relative; touch-action: none; user-select: none; -webkit-user-drag: none; -webkit-tap-highlight-color: rgba(0, 0, 0, 0); width: 100%; height: 100%;">
+    </canvas>
   </div>
 </div>
 
 <script>
+  
+
+  {% comment %} Отображение всплывающего меню создания и редактирования вершин {% endcomment %}
+  
   function clearPopUp() {
     document.getElementById("saveButton").onclick = null;
     document.getElementById("cancelButton").onclick = null;
     document.getElementById("network-popUp").style.display = "none";
   }
-
+  
   function cancelEdit(callback) {
     clearPopUp();
     callback(null);
   }
-
-  function saveData(data, callback) {
-    data.label = document.getElementById("node-label").value;
+  
+  
+  function saveData(data, operation, callback, pk) {
+    if (operation === 'addNode' ||  operation === 'editNode') {
+      data.name = document.getElementById("label").value;
+    }
     clearPopUp();
-    callback(data);
+    sendDataToServer(data, operation, callback, pk);
+  }
+  
+  
+  
+  function showPopup(operation, labelValue, callback, cancelCallback) {
+    document.getElementById("operation").innerText = operation;
+    document.getElementById("label").value = labelValue;
+  
+    if (operation === 'Удалить вершину' || operation === 'Удалить ребро') {
+      document.getElementById("label").parentNode.parentNode.style.display = "none";
+      document.getElementById("saveButton").style.backgroundColor = "#f44336";
+      document.getElementById('cancelButton').style.backgroundColor = '#AAAAAA'
+      document.getElementById("saveButton").value = "Удалить";
+    } else {
+      document.getElementById("label").parentNode.parentNode.style.display = "block";
+      document.getElementById("saveButton").style.backgroundColor = "#4CAF50";
+      document.getElementById('cancelButton').style.backgroundColor = '#f44336'
+      document.getElementById("saveButton").value = "Сохранить";
+    }
+  
+    document.getElementById("saveButton").onclick = callback;
+    document.getElementById("cancelButton").onclick = cancelCallback;
+    document.getElementById("network-popUp").style.display = "block";
+  }
+  
+  
+    function getPositionInCenter(container, element) {
+      var containerRect = container.getBoundingClientRect();
+      var elementRect = element.getBoundingClientRect();
+    
+      var offsetX = window.scrollX + containerRect.left + (containerRect.width - elementRect.width) / 2;
+      var offsetY = window.scrollY + containerRect.top + (containerRect.height - elementRect.height) / 2;
+    
+      return { x: offsetX, y: offsetY };
+    }
+    
+    function showNetworkPopUp() {
+      var network = document.getElementById('network');
+      var networkPopUp = document.getElementById('network-popUp');
+    
+      function updatePopUpPosition() {
+        var position = getPositionInCenter(network, networkPopUp);
+        var xOffset = networkPopUp.offsetWidth / 2; // половина ширины всплывающего окна
+        var yOffset = networkPopUp.offsetHeight / 2; // половина высоты всплывающего окна
+        networkPopUp.style.left = position.x - xOffset + 'px';
+        networkPopUp.style.top = position.y - yOffset + 'px';
+      }
+  
+    
+      updatePopUpPosition(); // установка начальной позиции
+    }
+  
+    
+  
+  
+  {% comment %} Отправка запросов {% endcomment %}
+  
+  function getCookie(name) {
+    const cookieValue = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+    return cookieValue ? cookieValue.pop() : '';
+  }
+  
+
+  const operationMethods = {
+    addNode: {
+      method: 'POST',
+      url: '/graphs/{{ graph_id }}/nodes/'
+    },
+  editNode: {
+      method: 'PUT',
+      url: '/graphs/{{ graph_id }}/nodes/{pk}'
+  },
+  deleteNode: {
+      method: 'DELETE',
+      url: '/graphs/{{ graph_id }}/nodes/{pk}/'
+  },
+  addEdge: {
+      method: 'POST',
+      url: '/graphs/{{ graph_id }}/edges/'
+  },
+  editEdge: {
+      method: 'PUT',
+      url: '/graphs/{{ graph_id }}/edges/{pk}/'
+  }
+};
+
+
+
+function sendDataToServer(data, operation, callback, pk) {
+  const method = operationMethods[operation].method;
+  let url = operationMethods[operation].url;
+
+  if (operation === 'editNode' || operation === 'deleteNode' || operation === 'editEdge') {
+      url = url.replace('{pk}', pk);
   }
 
+  const csrftoken = getCookie('csrftoken');
 
-
-$.ajax({
-    url: '/graphs/{{ graph_id }}',
-    type: 'GET',
-    dataType: 'json',
-    success: function(data) {
-      var nodes = [];
-      data.nodes.forEach(function(node) {
-        nodes.push({
-          id: node.id,
-          label: node.name
-        });
-      });
-      
-      var nodes_vis = new vis.DataSet(nodes);
-        
-      var edges = [];
-      Object.keys(data.edges).forEach(function(key) {
-          data.edges[key].forEach(function (target) {
-              edges.push({from: key, to: target});
-          });
-      });
-      var edges_vis = new vis.DataSet(edges);
-  
-      var graphData_vis = {
-          nodes: nodes_vis,
-          edges: edges_vis
-      };
-  
-      var container = document.getElementById('network');
-
-      
-      var locales = {
-        ru: {
-          edit: 'Изменить',
-          del: 'Удалить выбранное',
-          back: 'Назад',
-          addNode: 'Добавить вершину',
-          addEdge: 'Добавить ребро',
-          editNode: 'Редактировать вершину',
-          editEdge: 'Редактировать ребро',
-          addDescription: 'Нажмите на свободное пространство, чтобы разместить новую вершину.',
-          edgeDescription: 'Нажмите на вершину и проведите ребро до другой вершины, чтобы соединить их.',
-          editEdgeDescription: 'Нажми на конечные точки и проведи их к другой вершине, чтобы соединить их.',
-          createEdgeError: 'Невозможно связать вершины с кластером.',
-          deleteClusterError: 'Кластеры не могут быть удалены.',
-          editClusterError: 'Кластеры не могут быть изменены.'
-        }
-      };
-
-
-      var options = {
-        locale: 'ru',
-        locales: locales,
-        autoResize: true,
-        configure: {
-          enabled: false,
-          showButton: false,
-        },
-        nodes: {
-            borderWidth: 5,
-            borderWidthSelected: 10,
-            shape: "dot",
-            size: 20,
-            color: {
-              border: "#7D47B6",
-              background: "#4A1493",
-              highlight: {
-                border: "#A07AE9",
-                background: "#7D47B6",
-              },
-              hover: {
-                border: "#E0CA3C",
-                background: "#CD9709",
-              }
-            },
-            font: {
-              strokeWidth: 20
-            }
-        },
-
-        edges: {
-          color: { 
-            inherit: "to",
-            opacity: 0.75,
-          },
-          dashes: true,
-          arrows: "to"
-        },
-
-        interaction: {
-          hover: true,
-          keyboard: {
-            enabled: true
-          },
-          multiselect: true,
-          navigationButtons: true
-        },
-        layout: {
-          randomSeed: 2,
-            improvedLayout: true
-          },
-          physics: {
-            enabled: true
-          },
-          manipulation: {
-          enabled: true,
-          initiallyActive: false,
-          addNode: function (data, callback) {
-             document.getElementById("operation").innerText = "Добавить вершину";
-             document.getElementById("node-label").value = data.label;
-             document.getElementById("saveButton").onclick = saveData.bind(
-               this,
-               data,
-               callback
-               );
-               document.getElementById("cancelButton").onclick =
-               clearPopUp.bind();
-             document.getElementById("network-popUp").style.display = "block";
-           },
-           editNode: function (data, callback) {
-             // filling in the popup DOM elements
-             document.getElementById("operation").innerText = "Изменить вершину";
-             document.getElementById("node-label").value = data.label;
-             document.getElementById("saveButton").onclick = saveData.bind(
-               this,
-               data,
-               callback
-             );
-             document.getElementById("cancelButton").onclick = cancelEdit.bind(
-               this,
-               callback
-             );
-             document.getElementById("network-popUp").style.display = "block";
-           },
-           addEdge: function (data, callback) {
-            if (data.from == data.to) {
-              var r = confirm("Вы действительно хотите соединить ребро само с собой?");
-              if (r == true) {
-                callback(data);
-              }
-            } else {
-              callback(data);
-            }
-          }
-        },
-        groups: {}
-      };
-      var network = new vis.Network(container, graphData_vis);
-      network.setOptions(options);
-      },
-
-      error: function(jqXHR, textStatus, errorThrown) {
-          console.error('Ошибка при получении данных о графе: ' + textStatus, errorThrown);
+  fetch(url, {
+    method: method,
+    body: JSON.stringify(data),
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': csrftoken
+    },
+  })
+  .then(response => {
+      if (response.ok) {
+        return response.json();
+      } else {
+        throw new Error('Ошибка при отправке данных на сервер');
+      }
+  })
+  .then(responseData => {
+    if (operation === 'editNode' || operation === 'addNode') {
+      // Обновляем идентификатор вершины
+      data.id = responseData.id; // предполагается, что идентификатор приходит в ответе как responseData.id
+      data.label = data.name;
+      data.name = null;
     }
+    callback(data);
+  })
+  .catch(error => {
+    console.error('Ошибка fetch:', error);
+    callback(data);
+  });
+}
+  
 
 
+{% comment %} Получение информации с запросов {% endcomment %}
 
+$.when(
+  $.ajax({
+    url: '/graphs/{{ graph_id }}/nodes/',
+    type: 'GET',
+    dataType: 'json'
+  }),
+  $.ajax({
+    url: '/graphs/{{ graph_id }}/edges/',
+    type: 'GET',
+    dataType: 'json'
+  })
+).done(function(nodesResult, edgesResult) {
+  var nodes = [];
+  var edges = [];
+
+  nodesResult[0].forEach(function(node) {
+    nodes.push({
+      id: node.id,
+      label: node.name
     });
+  });
 
-// Получаем элемент меню
-var networkPopUp = document.getElementById('network-popUp');
+  edgesResult[0].forEach(function(item) {
+    var sourceNode = Object.keys(item)[0];
+    var targetNodes = item[sourceNode];
+    targetNodes.forEach(function(target) {
+        edges.push({ from: sourceNode, to: target });
+    });
+  });
 
-// Устанавливаем начальные координаты для перемещения меню
-var offsetX;
-var offsetY;
+  var nodes_vis = new vis.DataSet(nodes);
+  var edges_vis = new vis.DataSet(edges);
 
-// Функция, отвечающая за перемещение меню
-function dragStart(e) {
-  offsetX = e.clientX - networkPopUp.getBoundingClientRect().left;
-  offsetY = e.clientY - networkPopUp.getBoundingClientRect().top;
-  window.addEventListener('mousemove', drag);
-  window.addEventListener('mouseup', dragEnd);
-}
 
-// Функция, отслеживающая перемещение меню
-function drag(e) {
-  networkPopUp.style.left = e.clientX - offsetX + 'px';
-  networkPopUp.style.top = e.clientY - offsetY + 'px';
-}
+  var graphData_vis = {
+    nodes: nodes_vis,
+    edges: edges_vis
+  };
 
-// Функция, завершающая перемещение меню
-function dragEnd() {
-  window.removeEventListener('mousemove', drag);
-  window.removeEventListener('mouseup', dragEnd);
-}
+  var container = document.getElementById('network');
 
-// Отслеживаем нажатие кнопки мыши для начала перемещения меню
-networkPopUp.addEventListener('mousedown', dragStart);
+
+  var locales = {
+    ru: {
+      edit: 'Изменить',
+      del: 'Удалить выбранное',
+      back: 'Назад',
+      addNode: 'Добавить вершину',
+      addEdge: 'Добавить ребро',
+      editNode: 'Редактировать вершину',
+      editEdge: 'Редактировать ребро',
+      addDescription: 'Нажмите на свободное пространство, чтобы разместить новую вершину.',
+      edgeDescription: 'Нажмите на вершину и проведите ребро до другой вершины, чтобы соединить их.',
+      editEdgeDescription: 'Нажми на конечные точки и проведи их к другой вершине, чтобы соединить их.',
+      createEdgeError: 'Невозможно связать вершины с кластером.',
+      deleteClusterError: 'Кластеры не могут быть удалены.',
+      editClusterError: 'Кластеры не могут быть изменены.'
+    }
+  };
+
+
+
+var options = {
+  locale: 'ru',
+  locales: locales,
+  autoResize: true,
+  configure: {
+    enabled: false,
+    showButton: false,
+  },
+  nodes: {
+      borderWidth: 5,
+      borderWidthSelected: 10,
+      shape: "dot",
+      size: 20,
+      color: {
+        border: "#7D47B6",
+        background: "#4A1493",
+        highlight: {
+          border: "#A07AE9",
+          background: "#7D47B6",
+        },
+        hover: {
+          border: "#E0CA3C",
+          background: "#CD9709",
+        }
+      },
+      font: {
+        strokeWidth: 20
+      }
+  },
+
+  edges: {
+    color: { 
+      inherit: "to",
+      opacity: 0.75,
+    },
+    dashes: true,
+    arrows: "to"
+  },
+
+  interaction: {
+    hover: true,
+    keyboard: {
+      enabled: true
+    },
+    multiselect: true,
+    navigationButtons: true
+  },
+  layout: {
+    randomSeed: 2,
+    improvedLayout: true
+  },
+  physics: {
+    enabled: true
+  },
+  manipulation: {
+    enabled: true,
+    initiallyActive: false,
+    addNode: function (data, callback) {
+      showPopup("Добавить вершину", "Название вершины", saveData.bind(this, data, 'addNode', callback, null), cancelEdit.bind(this, callback));
+
+    },
+    editNode: function (data, callback) {
+      showPopup("Изменить вершину", data.label, saveData.bind(this, data, callback), cancelEdit.bind(this, callback));
+    },
+    deleteNode: function(data, callback) {
+      console.log(data);
+      showPopup("Удалить вершину", null, saveData.bind(this, data, 'deleteNode', callback, data.nodes[0]), cancelEdit.bind(this, callback));
+
+    },
+    addEdge: function (data, callback) {
+        var fromNodeId = data.from;
+        var toNodeId = data.to;
+
+        var connectedEdges = edges_vis.get({
+          filter: function (item) {
+            return item.from === fromNodeId;
+          }
+          });
+
+        var connectedNodes = connectedEdges.map(function(edge) {
+          return edge.to;
+        });
+
+        connectedNodes.push(toNodeId)
+
+    
+        data.source_node_id = parseInt(fromNodeId);
+        data.target_node_ids = connectedNodes;
+
+        saveData(data, 'addEdge', callback, null)
+
+    },
+    editEdge: false,
+      deleteEdge: function (data, callback) {
+        
+        var edgeIdToRemove = data.edges[0];
+        var fromNodeId = edges_vis.get(edgeIdToRemove).from;
+        var toNodeId = edges_vis.get(edgeIdToRemove).to;
+      
+ 
+      var outgoingEdges = edges_vis.get({
+        filter: function (item) {
+          return ((item.from === fromNodeId) && (item.to != toNodeId));
+        }
+      });
+      
+      var connectedNodes = outgoingEdges.map(function(edge) {
+        return edge.to;
+      });
+      
+
+      data.source_node_id = parseInt(fromNodeId);
+      data.target_node_ids = connectedNodes;
+
+      saveData(data, 'editEdge', callback, fromNodeId)
+  }
+  
+  
+},
+groups: {}
+
+};
+
+var network = new vis.Network(container, graphData_vis, options);
+
+});
+
+
+
 </script>
+
 {% endblock %}

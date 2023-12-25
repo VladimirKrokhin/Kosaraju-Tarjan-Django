@@ -1,8 +1,8 @@
-from algorythm.models import Graph
-from algorythm.serializers import GraphSerializer, GraphDetailSerializer, UserSerializer
-from algorythm.permissions import IsOwnerOrReadOnly
+from algorythm.models import Graph, Node
+from algorythm.serializers import GraphSerializer, UserSerializer, NodeSerializer, EdgeSerializer
+from algorythm.permissions import IsOwnerOrReadOnly, IsGraphOwner
 
-from rest_framework import generics, permissions, renderers
+from rest_framework import generics, permissions, renderers, mixins
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.reverse import reverse
@@ -44,12 +44,49 @@ class GraphDetail(generics.RetrieveUpdateDestroyAPIView):
     """
 
     queryset =  Graph.objects.all()
-    serializer_class = GraphDetailSerializer
+    serializer_class = GraphSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly,
                           IsOwnerOrReadOnly]
 
-    # def perform_create(self, serializer):
-    #     serializer.save(owner=self.request.user)
+    def perform_create(self, serializer):
+     serializer.save(owner=self.request.user)
+
+
+
+class NodeView(generics.RetrieveUpdateDestroyAPIView):
+        queryset = Node.objects.all()        
+        serializer_class = NodeSerializer
+        permission_classes = [IsGraphOwner]
+
+  
+
+
+
+class NodeListView(generics.ListCreateAPIView):
+    queryset = Node.objects.all()
+    serializer_class = NodeSerializer
+    permission_classes = [IsGraphOwner]
+
+    def perform_create(self, serializer):
+        graph_id = self.kwargs['graph_id']  # Извлекаем 'graph_id' из URL параметров
+        context = serializer.context
+        context['graph_id'] = graph_id  # Передаем 'graph_id' в контекст сериализатора
+        serializer.save()
+
+
+
+
+
+class EdgeView(generics.RetrieveUpdateAPIView):
+    queryset = Node.objects.all()
+    serializer_class = EdgeSerializer
+    permission_classes = [IsGraphOwner]
+
+
+class EdgeListView(generics.ListCreateAPIView):
+    queryset = Node.objects.all()
+    serializer_class = EdgeSerializer
+    permission_classes = [IsGraphOwner]
 
 
 
