@@ -1,4 +1,8 @@
-from .models import Graph, Node
+from algorythm.models import Graph, Node
+from algorythm.kosarajus_algorythm import kosaraju_algo
+from algorythm.tarjans_algorythm import tarjan_algo
+
+
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework.response import Response
@@ -13,14 +17,15 @@ class NodeSerializer(serializers.ModelSerializer):
         fields = ['id', 'name']
 
     def create(self, validated_data):
-        if 'graph_id' in self.context:
-            graph_id = self.context['graph_id']  # Получаем graph_id из контекста
+        if 'graph_id' in validated_data:
+            graph_id = validated_data['graph_id']  # Получаем graph_id из контекста
             graph = Graph.objects.get(pk=graph_id)  # Получаем объект текущего графа
             node = Node.objects.create(graph=graph, **validated_data)  # Создаем вершину с указанным графом
             return node
         else:
             # Обработка ситуации, когда 'graph_id' отсутствует в контексте
             raise serializers.ValidationError("Не указан 'graph_id' в контексте при создании вершины.")
+
 
 
 
@@ -101,6 +106,26 @@ class EdgeSerializer(serializers.Serializer):
 
         return data
 
+
+
+class RunAlgorithmSerializer(serializers.Serializer):
+    graph_id = serializers.IntegerField()
+    algorithm_type = serializers.CharField()
+
+    def validate_algorithm_type(self, value):
+        if value not in ['kosaraju', 'tarjan']:
+            raise serializers.ValidationError("Неправильный тип алгоритма")
+        return value
+
+    def retrieve(self, validated_data):
+        graph = Graph.objects.get(pk=validated_data['graph_id'])
+        node_list = graph.get_node_ids()
+        adj_list = graph.get_adj_list()
+        if validated_data["algorithm_type"] == 'kosaraju':
+            result_array = kosaraju_algo(adj_list, node_list)
+        elif validated_data["algorithm_type"] == "tarjan":
+            result_array = tarjan_algo(adj_list, node_list)
+        return result_array
 
 
 class GraphSerializer(serializers.ModelSerializer):

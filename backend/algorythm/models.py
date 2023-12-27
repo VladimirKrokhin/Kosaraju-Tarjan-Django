@@ -6,7 +6,7 @@ from django.conf import settings
 # Модель графа (как граф связан с пользователем)
 class Graph(models.Model):
         id = models.BigAutoField(primary_key=True)
-        name = models.CharField(verbose_name="graph's =  name", max_length=80)
+        name = models.CharField(verbose_name="Имя графа: ", max_length=80)
         owner = models.ForeignKey(User, related_name="graphs", on_delete=models.CASCADE)
 
         def __str__(self):
@@ -33,6 +33,8 @@ class Graph(models.Model):
         def get_node_ids(self):
             nodes = self.nodes.all()
             return [node.id for node in nodes]
+
+
 
 
             

@@ -10,6 +10,10 @@
     {% block include %}{% endblock %}
 </head>
 <body>
+    {% if request.user.is_authenticated %}
+      <a href="{% url 'logout' %}">Выйти</a>
+      <a href="javascript:history.back()">Назад</a>
+    {% endif %}
     {% block content %}{% endblock %}
 </body>
 </html>

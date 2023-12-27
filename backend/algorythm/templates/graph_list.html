@@ -1,0 +1,36 @@
+{% extends "_base.html" %}
+
+{% block title %}
+Список графов пользователя
+{% endblock %}
+
+{% block include %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% endblock %}
+
+
+{% block content %}
+<h1>Список графов пользователя</h1>
+<ul id="graph-list">
+</ul>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="Создать новый">
+</form>
+
+
+<script>
+    $(document).ready(function() {
+        $.get('/graphs/', function(data) {
+            data.forEach(function(graph) {
+                $('#graph-list').append('<li>' + graph.name + ' (Id: ' + graph.id + ') - <a href="/index/' + graph.id + '">Перейти</a></li>');
+            });
+        });
+    });
+</script>
+{% endblock %}
+
+
+

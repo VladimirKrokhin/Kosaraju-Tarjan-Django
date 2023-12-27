@@ -4,12 +4,16 @@
     Вход
  {% endblock %}
 
+{% block include %}
+{% endblock %}
 
 {% block content %}
-<h2>Вход</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Войти</button>
-    </form>
+<h2>Войдите в систему</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="hidden" name="next" value="{{ request.GET.next }}">
+    <button type="submit">Войти</button>
+</form>
+<p>Ещё не зарегистрированы? <a href="{% url 'registration' %}">Зарегистрироваться</a></p>
 {% endblock %}

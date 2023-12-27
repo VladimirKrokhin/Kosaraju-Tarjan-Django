@@ -18,14 +18,16 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
-from django.contrib.auth.views import LoginView, LogoutView
+from django.contrib.auth.views import LogoutView
+from algorythm.views import login_view, registration
 
 # TODO: Добавить возможность просматривать корневой путь сайта
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('login/', LoginView.as_view(template_name='login.html'), name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('login/', login_view, name='login'),
+    path('logout/', LogoutView.as_view(template_name='logout.html'), name='logout'),
+    path('registration/', registration, name='registration'),
     path('', include("algorythm.urls")),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

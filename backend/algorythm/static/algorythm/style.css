@@ -1,20 +1,59 @@
-
-
-/* Основные стили */
 body {
-  font-family: Arial, sans-serif;
+  width: 100vw;
+  height: 100vh; 
   margin: 0;
   padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
 }
+
+
+
+
+#result-container {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.component {
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.component > div {
+  display: table-row;
+  padding: 5px 0;
+}
+
+.component > div:nth-child(odd) {
+  background-color: #f2f2f2;
+  border: 1px solid #ccc;
+}
+
+.component > div > span {
+  display: table-cell;
+  padding: 5px;
+}
+
 
 body,
 select {
   font: 10pt sans;
 }
 
+
+#slider-container{
+  display: flex;
+  flex-direction: column;
+  margin: 15px;
+}
+
 #network {
-  width: 800px;
-  height: 600px;
+  width: 90%;
+  height: 60%;
   background-color: #F6F2FF;
   position: relative;
   border: 1px solid lightgray;
@@ -42,23 +81,23 @@ select {
 
 
 #network-popUp table {
-  margin: auto;  /* Выравнивание по центру */
-  width: 100%;  /* Растягиваем таблицу на всю ширину контейнера */
+  margin: auto;
+  width: 100%;
 }
 
 #network-popUp input {
-  display: block; /* Размещаем поля ввода на новой строке */
-  width: calc(100% - 20px);  /* 100% ширина с вычетом отступов */
-  margin: 10px 0;  /* Отступы сверху и снизу */
-  padding: 5px;  /* Придаем полям ввода отступы внутри, чтобы текст не "прилипал" к границам */
-  box-sizing: border-box; /* Учитываем отступы и рамку в ширине элемента */
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px 0;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
 #saveButton, #cancelButton {
-  width: calc(50% - 7.5px);  /* 50% ширина с вычетом отступов */
-  margin: 10px 3.75px;  /* Отступы сверху и снизу, половина отступов по бокам */
-  padding: 5px;  /* Придаем кнопкам отступы внутри */
-  box-sizing: border-box; /* Учитываем отступы и рамку в ширине элемента */
+  width: calc(50% - 7.5px);
+  margin: 10px 3.75px;
+  padding: 5px;
+  box-sizing: border-box;
 }
 
 #saveButton {
@@ -71,66 +110,4 @@ select {
   background-color: #f44336;
   color: white;
   border: none;
-}
-
-
-/* Стили для компонентов */
-h1 {
-  font-size: 24px;
-  color: #333;
-}
-
-a {
-  text-decoration: none;
-  color: #007bff;
-}
-
-/* Медиа-запросы для адаптивной верстки */
-@media (max-width: 768px) {
-  /* Стили для мобильных устройств */
-}
-
-/* Стили для таблицы */
-
-
-table.legend_table {
-  font-size: 11px;
-  border-width: 1px;
-  border-color: #d3d3d3;
-  border-style: solid;
-}
-table.legend_table,
-td {
-  border-width: 1px;
-  border-color: #d3d3d3;
-  border-style: solid;
-  padding: 2px;
-}
-div.table_content {
-  width: 80px;
-  text-align: center;
-}
-div.table_description {
-  width: 100px;
-}
-
-/* Стили для четных строк */
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-
-/* Стили для заголовков столбцов */
-th {
-  background-color: #4CAF50;
-  color: white;
-}
-
-/* Стили для строк при наведении */
-tr:hover {
-  background-color: #e2e2e2;
-}
-
-/* Стили для активной строки */
-tr.active {
-  background-color: #c7c7c7;
 }

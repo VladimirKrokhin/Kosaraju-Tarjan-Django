@@ -32,22 +32,48 @@
   </div>
 </div>
 
+<div id="slider-container">
+  <input type="range" min="0" max="1" value="0" step="1" id="algorithm-slider">
+  <div id="algorithm-label" style="text-align: center; margin-top: 10px;">Выбранный алгоритм: Косарайю</div>
+</div>
+
+<input type="button" value="Запустить алгоритм" id = 'runButton'>
+
+<div id="result-container">
+</div>
+
 <script>
 
-  let network;
+
+  var network;
+  var nodes_vis = new vis.DataSet();
+  var edges_vis = new vis.DataSet();
 
   document.addEventListener('DOMContentLoaded', () => {
-    const runButton = document.createElement('input'); // создаем кнопку
-    runButton.type = 'button'; // устанавливаем тип
-    runButton.value = 'Запустить алгоритм'; // устанавливаем текст кнопки
-    runButton.id = 'runButton'; // устанавливаем id
-    document.body.appendChild(runButton); // добавляем кнопку в body
+    // Получаем элементы слайдера и подписи
+    const slider = document.getElementById('algorithm-slider');
+    const label = document.getElementById('algorithm-label');
+  
+    // Обработчик изменения значения слайдера
+    slider.oninput = function() {
+      // Изменяем подпись в зависимости от выбранного значения
+      if (this.value === '0') {
+        label.innerHTML = 'Выбранный алгоритм: Косарайю';
+      } else if (this.value === '1') {
+        label.innerHTML = 'Выбранный алгоритм: Тарьяна';
+      }
+    };
+  
 
+  
+    // Добавляем слушатель событий для кнопки
     runButton.addEventListener('click', () => {
-      runAlgorithmAndDisplayResult(network); // вызов функции при нажатии на кнопку
+      runAlgorithmAndDisplayResult(); // вызов функции при нажатии на кнопку
     });
+
   });
   
+
 
   {% comment %} Отображение всплывающего меню создания и редактирования вершин {% endcomment %}
   
@@ -106,11 +132,11 @@
     }
     
     function showNetworkPopUp() {
-      var network = document.getElementById('network');
+      var networkEl = document.getElementById('network');
       var networkPopUp = document.getElementById('network-popUp');
     
       function updatePopUpPosition() {
-        var position = getPositionInCenter(network, networkPopUp);
+        var position = getPositionInCenter(networkEl, networkPopUp);
         var xOffset = networkPopUp.offsetWidth / 2; // половина ширины всплывающего окна
         var yOffset = networkPopUp.offsetHeight / 2; // половина высоты всплывающего окна
         networkPopUp.style.left = position.x - xOffset + 'px';
@@ -139,7 +165,7 @@
     },
   editNode: {
       method: 'PUT',
-      url: '/graphs/{{ graph_id }}/nodes/{pk}'
+      url: '/graphs/{{ graph_id }}/nodes/{pk}/'
   },
   deleteNode: {
       method: 'DELETE',
@@ -231,8 +257,8 @@ $.when(
     });
   });
 
-  var nodes_vis = new vis.DataSet(nodes);
-  var edges_vis = new vis.DataSet(edges);
+  nodes_vis.add(nodes);
+  edges_vis.add(edges);
 
 
   var graphData_vis = {
@@ -295,8 +321,7 @@ var options = {
 
   edges: {
     color: { 
-      inherit: "to",
-      opacity: 0.75,
+      inherit: "both"
     },
     dashes: true,
     arrows: "to"
@@ -307,7 +332,6 @@ var options = {
     keyboard: {
       enabled: true
     },
-    multiselect: true,
     navigationButtons: true
   },
   layout: {
@@ -325,10 +349,9 @@ var options = {
 
     },
     editNode: function (data, callback) {
-      showPopup("Изменить вершину", data.label, saveData.bind(this, data, callback), cancelEdit.bind(this, callback));
+      showPopup("Изменить вершину", data.label, saveData.bind(this, data,'editNode', callback, data.id), cancelEdit.bind(this, callback));
     },
     deleteNode: function(data, callback) {
-      console.log(data);
       showPopup("Удалить вершину", null, saveData.bind(this, data, 'deleteNode', callback, data.nodes[0]), cancelEdit.bind(this, callback));
 
     },
@@ -393,16 +416,32 @@ network = new vis.Network(container, graphData_vis, options);
 
 
 
+var generatedColors = []; // массив сохраненных сгенерированных цветов
+
 function generateRandomColor() {
-  // Генерируем случайное целое число для каждого канала цвета (RGB)
-  var r = Math.floor(Math.random() * 256);
-  var g = Math.floor(Math.random() * 256);
-  var b = Math.floor(Math.random() * 256);
-
-  // Форматируем значения каналов цвета в строку HEX
-  var color = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-
+  var color;
+  var similarColorExists = true;
+  while (similarColorExists) {
+    var r = Math.floor(Math.random() * 256);
+    var g = Math.floor(Math.random() * 256);
+    var b = Math.floor(Math.random() * 256);
+    color = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    similarColorExists = generatedColors.some(function(existingColor) {
+      return colorDiff(color, existingColor) < 70; // различие в 70 или менее
+    });
+  }
+  generatedColors.push(color);
   return color;
+}
+
+function colorDiff(color1, color2) {
+  var r1 = parseInt(color1.substr(1, 2), 16);
+  var g1 = parseInt(color1.substr(3, 2), 16);
+  var b1 = parseInt(color1.substr(5, 2), 16);
+  var r2 = parseInt(color2.substr(1, 2), 16);
+  var g2 = parseInt(color2.substr(3, 2), 16);
+  var b2 = parseInt(color2.substr(5, 2), 16);
+  return Math.sqrt(Math.pow(r1 - r2, 2) + Math.pow(g1 - g2, 2) + Math.pow(b1 - b2, 2));
 }
 
 
@@ -410,9 +449,11 @@ function createRandomGroups(numGroups) {
   var groups = {};
   for (var i = 1; i <= numGroups; i++) {
     var groupName = "group" + i;
+    newColor = generateRandomColor();
     groups[groupName] = {
       color: {
-        background: generateRandomColor()
+        background: newColor,
+        border: newColor
       }
     };
   }
@@ -420,11 +461,22 @@ function createRandomGroups(numGroups) {
 }
 
 
-function runAlgorithmAndDisplayResult(network) {
+function runAlgorithmAndDisplayResult() {
+
+  const runButton = document.getElementById('runButton');
+  runButton.disabled = true; 
+
+  const algorithmSlider = document.getElementById('algorithm-slider');
+  const algorithmType = algorithmSlider.value == '0' ? 'kosaraju' : 'tarjan';
+
+  const controller = new AbortController();
+  const signal = controller.signal;
+
+  const timeoutId = setTimeout(() => controller.abort(), 5000);
+
   const csrftoken = getCookie('csrftoken');
 
-  // Вызов API для запуска алгоритма
-  fetch("/graphs/{{ graph_id }}/run-algorithm/?algorithm_type=kosaraju", {
+  fetch("/graphs/{{ graph_id }}/run-algorithm/?algorithm_type=" + algorithmType, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -436,29 +488,52 @@ function runAlgorithmAndDisplayResult(network) {
   .then(data => {
     const node_ids = data;
     const numberOfGroups = node_ids.length;
-    const randomOfGroups = createRandomGroups(numberOfGroups);
-    var opt = {
-      groups: randomOfGroups
-    };
+    const groups = createRandomGroups(numberOfGroups);
+    var opt = { groups };
     network.setOptions(opt);
     var groupsAssigned = assignGroupsToVertices(node_ids);
 
-    // Перекраска вершин
     for (var vertex in groupsAssigned) {
       var group = groupsAssigned[vertex];
-      var node = network.body.nodes[vertex];
-      if (node) {
-          node.group =  group;
-      }
+      nodes_vis.update({id: vertex, group:group})
     }
 
+    const resultContainer = document.getElementById('result-container'); 
+
+    resultContainer.innerHTML = '';
+
+
+    data.forEach((component, index) => {
+      const componentElement = document.createElement('div');
+      componentElement.classList.add('components'); 
+      const componentTitle = document.createElement('p');
+      componentTitle.innerText = "Компонента связности " + (index + 1) + ":";
+    
+      componentElement.appendChild(componentTitle);
+    
+      component.forEach(element => {
+        const nodeName = nodes_vis.get(element).label;
+        const item = document.createElement('p');
+        item.innerText = "id: " + element + " - " + nodeName;
+        componentElement.appendChild(item);
+      });
+    
+      resultContainer.appendChild(componentElement); // Добавить элемент на страницу
+    });
   })
   .catch(error => {
     console.error('Ошибка при вызове API:', error);
+  })
+  .finally(() => {
+    clearTimeout(timeoutId); // Очищаем таймаут при завершении запроса
+    runButton.disabled = false;
   });
-}  
 
-runAlgorithmAndDisplayResult(network); 
+
+
+
+}
+
 
 
 function assignGroupsToVertices(listOfStronglyConnectedComponents) {
