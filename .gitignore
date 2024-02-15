@@ -2,7 +2,7 @@
 .env
 *.pyc
 .*
-
+!.env_example
 db.*
 backend/‘/
 backend/lib/
