@@ -298,8 +298,8 @@ var options = {
     showButton: false,
   },
   nodes: {
-      borderWidth: 5,
-      borderWidthSelected: 10,
+      borderWidth: 2,
+      borderWidthSelected: 5,
       shape: "dot",
       size: 20,
       color: {
@@ -416,21 +416,33 @@ network = new vis.Network(container, graphData_vis, options);
 
 
 
+const COLOR_DIFF_THRESHOLD = 70;
+
 var generatedColors = []; // массив сохраненных сгенерированных цветов
+var count = 0;
 
 function generateRandomColor() {
   var color;
   var similarColorExists = true;
-  while (similarColorExists) {
+
+  while (similarColorExists && count < 10) {
     var r = Math.floor(Math.random() * 256);
     var g = Math.floor(Math.random() * 256);
     var b = Math.floor(Math.random() * 256);
     color = "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     similarColorExists = generatedColors.some(function(existingColor) {
-      return colorDiff(color, existingColor) < 70; // различие в 70 или менее
+      return colorDiff(color, existingColor) < COLOR_DIFF_THRESHOLD;
     });
+    count++;
   }
-  generatedColors.push(color);
+
+  if (similarColorExists) {
+    // Не удалось найти достаточно отличающийся цвет.
+    // Обработка ошибок здесь.
+    color = generateRandomColor()
+  } 
+  count = 0
+
   return color;
 }
 
@@ -446,6 +458,7 @@ function colorDiff(color1, color2) {
 
 
 function createRandomGroups(numGroups) {
+  generatedColors = [];
   var groups = {};
   for (var i = 1; i <= numGroups; i++) {
     var groupName = "group" + i;
@@ -453,7 +466,7 @@ function createRandomGroups(numGroups) {
     groups[groupName] = {
       color: {
         background: newColor,
-        border: newColor
+        border: "#074F57"
       }
     };
   }

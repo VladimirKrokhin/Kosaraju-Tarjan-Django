@@ -8,9 +8,10 @@ from algorythm import views
 app_name = "algorythm"
 urlpatterns = [
     # path("create/", views.create_graph, name="create"),
+    path("", views.index_graphs, name="index-graphs"),
     path("index/", views.index_graphs, name='index-graphs'),
     path("index/<int:graph_id>/", views.index, name="index"),
-    path('', views.ApiRoot.as_view(), name="api-root"),
+    path('api/', views.ApiRoot.as_view(), name="api-root"),
 ]
 
 urlpatterns += format_suffix_patterns([
